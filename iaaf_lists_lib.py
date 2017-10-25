@@ -21,7 +21,7 @@ agegroup = ['senior', 'u18', 'u20']
 
 re_competitor = re.compile(
     r'<a href="/athletes/athlete=(?P<id>\d+)">'
-    r'(?P<name>.?*).?* (?P<surname>.?*)</span>',
+    r'(?P<name>.*?).*? (?P<surname>.*?)</span>',
     re.DOTALL
     )
 
