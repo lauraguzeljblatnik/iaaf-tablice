@@ -21,7 +21,20 @@ agegroup = ['senior', 'u18', 'u20']
 
 re_competitor = re.compile(
     r'<a href="/athletes/athlete=(?P<id>\d+)">'
-    r'(?P<name>.*?).*? (?P<surname>.*?)</span>',
+    r'(?P<name>.*?).*?(?P<surname>.*?)</span>',
+    re.DOTALL
+    )
+
+rx_info = re.compile(
+    r'<td data-th="Rank">(?P<rank>.*?)</td>'
+    r'<td data-th="Mark">(?P<time>.*?)</td>'
+    r'.*?'
+    r' <td data-th="DOB">(?P<DOB>.*?)</td>'
+    r'<td data-th="Nat"><.*?/>(?P<nationality>.*?)</td>'
+    r'<td data-th="Pos">(?P<position>.*?)</td>'
+    r'.*?'
+    r'<td data-th="Venue">(?P<venue>.*?)</td>'
+    r'<td data-th="Date">(?P<date>.*?)</td>',
     re.DOTALL
     )
 
@@ -50,13 +63,16 @@ def download_all_time_lists(
         with open(path, 'w', encoding='utf-8') as file_out:
             file_out.write(r.text)
 
-def save_data_to_dict(file):
+def split_lists(page_content):
     rx = re.compile(
-    r'<td data-th="Rank">(?P<rank>.?*)</td>'
-    r'<td data-th="Mark">(?P<time>.?*)</td>',
-    re.DOTALL
-    )
-    data = re.search(rx, file)
+        r'<tr data-id="\d+">(.*?)</td>',
+        re.DOTALL
+        )
+    matches = re.findall(rx,page_content)
+    return matches
+
+#split to rank
+#read file
 
 
 
