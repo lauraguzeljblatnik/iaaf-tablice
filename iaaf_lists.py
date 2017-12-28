@@ -1,11 +1,12 @@
 #projektna naloga za Programiranje 1
 #primerjava časov za ralične atletske discipline skozi leta
 
-import requests
-import re
-import os
 import csv
-
+import json
+import os
+import re
+import requests
+from pprint import pprint
 
 lists_directory = 'iaaf_lists'
 
@@ -22,12 +23,6 @@ re_block_result = re.compile(
     r'<tr data-id="\d+" >(?P<block>.*?)</tr>',
     flags=re.DOTALL
 )
-
-re_competitor = re.compile(
-    r'<a href="/athletes/athlete=(?P<id>\d+)">'
-    r'(?P<name>.*?)<span class=.name-uppercase.>(?P<surname>.*?)</span>',
-    re.DOTALL
-    )
 
 re_result_info = re.compile(
     r'<td data-th="Rank">(?P<rank>.*?)</td>'
@@ -49,17 +44,23 @@ re_result_info = re.compile(
     re.DOTALL
     )
 
-
+#problemi:
+    #kako najti vse do Mixed race
+    #kaj delajo Nonei na koncu
+    #kodiranje dela neke probleme hmmm
 def result_info(single_result):
-    match = re_result_info.search(single_result)
+    match = re.search(re_result_info, single_result)
     if match:
         result = match.groupdict()
-##        result['rank'] = int(result['rank']) if result['rank'] else None
-##        result['time'] = result['time'].strip
-##        result['DOB'] = result['DOB']
-        #print(result['rank'], result['time'], result['DOB'])
+        result['rank'] = int(result['rank'].strip()) if result['rank'].strip() != '' else None
+        result['time'] = str(result['time']).strip()
+        result['DOB'] = result['DOB'].strip()
+        result['nationality'] = result['nationality'].strip()
+        result['position'] = result['position'].strip()
+        result['venue'] = result['venue'].strip()
+        result['date'] = result['date'].strip()
+        pprint( result)
         return result
-        print('match')
     else:
         print('cannot read this result, im useless :(')
         print(single_result)
@@ -97,9 +98,22 @@ def read_lists(directory):
         path = os.path.join(directory, file_name)
         with open(path, 'r') as file:
             file_content = file.read()
-            for single_result in re_block_result.finditer(file_content):
+            for single_result in re.finditer(re_block_result,file_content):
                 results.append(result_info(single_result.group(0)))
     return results
+
+
+def zapisi_json(podatki, ime_datoteke):
+    with open(ime_datoteke, 'w') as datoteka:
+        json.dump(podatki, datoteka, indent=2)
+
+
+def zapisi_csv(podatki, polja, ime_datoteke):
+    with open(ime_datoteke, 'w') as datoteka:
+        pisalec = csv.DictWriter(datoteka, polja, extrasaction='ignore')
+        pisalec.writeheader()
+        for podatek in podatki:
+            pisalec.writerow(podatek)
 
 
 #UKAZI
@@ -108,6 +122,9 @@ def read_lists(directory):
 ##    'middlelong', '5000-metres', 'outdoor', 'women', 'senior', lists_directory
 ##    )
 
-lists = read_lists(lists_directory)
+results = read_lists(lists_directory)
+
+zapisi_json(results, 'lists.json')
+
 
 
