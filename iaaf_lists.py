@@ -59,7 +59,7 @@ def result_info(single_result):
         result['position'] = result['position'].strip()
         result['venue'] = result['venue'].strip()
         result['date'] = result['date'].strip()
-        pprint( result)
+        #pprint( result)
         return result
     else:
         print('cannot read this result, im useless :(')
@@ -122,9 +122,15 @@ def zapisi_csv(podatki, polja, ime_datoteke):
 ##    'middlelong', '5000-metres', 'outdoor', 'women', 'senior', lists_directory
 ##    )
 
-results = read_lists(lists_directory)
+lists = read_lists(lists_directory)
 
-zapisi_json(results, 'lists.json')
+zapisi_json(lists, 'lists.json')
 
+polja = [
+    'date', 'time', 'name', 'surname', 'id', 'rank', 'position',
+    'DOB', 'venue', 'nationality',
+]
+
+zapisi_csv(lists, polja, 'lists.csv')
 
 
