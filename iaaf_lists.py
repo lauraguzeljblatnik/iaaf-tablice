@@ -1,5 +1,5 @@
 #projektna naloga za Programiranje 1
-#primerjava časov za ralične atletske discipline skozi leta
+#primerjava časov na 5000m skozi leta
 
 import csv
 import json
@@ -10,14 +10,11 @@ from pprint import pprint
 
 lists_directory = 'iaaf_lists'
 
-category_discipline = {'sprints':(
-                '100-metres', '200-metres', '400-metres'),
-                'middlelong':(
-                '800-metres', '1500-metres', '5000-metres', '10000-metres'
-                )}
-where = ['outdoor', 'indoor']
-gender = ['women', 'men']
-agegroup = ['senior', 'u18', 'u20']
+year_and_page = [(2001, 4), (2002, 5), (2003, 5), (2004, 5),
+                 (2005, 5), (2006, 5), (2007, 5), (2008, 5),
+                 (2009, 12), (2010, 16), (2011, 17), (2012, 19),
+                 (2013, 19), (2014, 20), (2015, 20), (2016, 20),
+                 (2017, 22)]
 
 re_block_result = re.compile(
     r'<tr data-id="\d+" >(?P<block>.*?)</tr>',
@@ -44,10 +41,7 @@ re_result_info = re.compile(
     re.DOTALL
     )
 
-#problemi:
-    #kako najti vse do Mixed race
-    #kaj delajo Nonei na koncu
-    #kodiranje dela neke probleme hmmm
+
 def result_info(single_result):
     match = re.search(re_result_info, single_result)
     if match:
@@ -67,31 +61,33 @@ def result_info(single_result):
 
 
 
-#choose category, discipline, where, gender and agegroup from lists upwards
-def download_all_time_lists(
-    category, discipline, where, gender, agegroup, directory
-    ):
+#prenese vse tablice od leta 2001 naprej
+def download_all_time_lists (directory):
     os.makedirs(directory, exist_ok=True)
-    for year in range(1999, 2018):
-        try:
-            url = (
-                'https://www.iaaf.org/'
-                'records/toplists/'
-                '{}/{}/{}/{}/{}/{}'
-            ).format(category, discipline, where, gender, agegroup, year)
-            r = requests.get(url)
-        except requests.exceptions.RequestException as e:
-            print(e)
-            return None
+    for (year, page) in year_and_page : 
+        for p in range (1, page + 1):
+            try:
+                url = (
+                'https://www.iaaf.org/records/toplists/middlelong/'
+                '5000-metres/outdoor/women/senior/'
+                '{}?regionType=world&page={}&bestResultsOnly=true'
+                ).format(year, p)
+                session = requests.Session()
+                r = session.get(url, headers={'User-Agent': 'Mozilla/5.0'})
+                print(r.status_code)
+                print(url)
+        
+            except requests.exceptions.RequestException as e:
+                print(e)
+                return None
 
-        filename = 'iaaf_lists_{}_{}_{}_{}_{}.html'.format(
-            discipline, where, gender, agegroup, year
-            )
-        path = os.path.join(directory, filename)
-        with open(path, 'w', encoding='utf-8') as file_out:
-            file_out.write(r.text)
+            filename = 'iaaf_lists_5000m_ women_{}_{}.html'.format(
+                        year, p)
+            path = os.path.join(directory, filename)
+            with open(path, 'w', encoding='utf-8') as file_out:
+                file_out.write(r.text)
 
-
+#prebere htmk datoteke v izbranem imeniku
 def read_lists(directory):
     results = []
     for file_name in os.listdir(directory):
@@ -118,19 +114,17 @@ def zapisi_csv(podatki, polja, ime_datoteke):
 
 #UKAZI
 
-##download_all_time_lists(
-##    'middlelong', '5000-metres', 'outdoor', 'women', 'senior', lists_directory
-##    )
-
+## download_all_time_lists(lists_directory)
+   
 lists = read_lists(lists_directory)
-
-zapisi_json(lists, 'lists.json')
-
-polja = [
-    'date', 'time', 'name', 'surname', 'id', 'rank', 'position',
-    'DOB', 'venue', 'nationality',
-]
-
-zapisi_csv(lists, polja, 'lists.csv')
+##
+##zapisi_json(lists, 'lists.json')
+##
+##polja = [
+##    'date', 'time', 'name', 'surname', 'id', 'rank', 'position',
+##    'DOB', 'venue', 'nationality',
+##]
+##
+##zapisi_csv(lists, polja, 'lists.csv')
 
 
