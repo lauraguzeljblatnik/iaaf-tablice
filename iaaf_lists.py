@@ -17,7 +17,7 @@ year_and_page = [(2001, 4), (2002, 5), (2003, 5), (2004, 5),
                  (2017, 22)]
 
 re_block_result = re.compile(
-    r'<tr data-id="\d+" >(?P<block>.*?)</tr>',
+    r'<tr>\s*(?P<block><td data-th="Rank">.*?)</tr>',
     flags=re.DOTALL
 )
 
@@ -26,8 +26,8 @@ re_result_info = re.compile(
     r'.*?'
     r'<td data-th="Mark">(?P<time>.*?)</td>'
     r'.*?'
-    r'<td data-th="Competitor">.*?<a href="/athletes/athlete=(?P<id>\d+)">'
-    r'(?P<name>.*?) <span class=.name-uppercase.>(?P<surname>.*?)</span></a>'
+    r'<td data-th="Competitor">\s*<a href="/athletes/.*?">'
+    r'\s*(?P<name>.*?)\s*</a>'
     r'.*?'
     r'<td data-th="DOB">(?P<DOB>.*?)</td>'
     r'.*?'
@@ -57,7 +57,7 @@ def result_info(single_result):
         return result
     else:
         print('cannot read this result, im useless :(')
-        print(single_result)
+        #print(single_result)
 
 
 
@@ -87,12 +87,12 @@ def download_all_time_lists (directory):
             with open(path, 'w', encoding='utf-8') as file_out:
                 file_out.write(r.text)
 
-#prebere htmk datoteke v izbranem imeniku
+#prebere html datoteke v izbranem imeniku
 def read_lists(directory):
     results = []
     for file_name in os.listdir(directory):
         path = os.path.join(directory, file_name)
-        with open(path, 'r') as file:
+        with open(path, 'r', encoding='utf-8') as file:
             file_content = file.read()
             for single_result in re.finditer(re_block_result,file_content):
                 results.append(result_info(single_result.group(0)))
@@ -100,12 +100,12 @@ def read_lists(directory):
 
 
 def zapisi_json(podatki, ime_datoteke):
-    with open(ime_datoteke, 'w') as datoteka:
+    with open(ime_datoteke, 'w', encoding='utf-8') as datoteka:
         json.dump(podatki, datoteka, indent=2)
 
 
 def zapisi_csv(podatki, polja, ime_datoteke):
-    with open(ime_datoteke, 'w') as datoteka:
+    with open(ime_datoteke, 'w', encoding='utf-8') as datoteka:
         pisalec = csv.DictWriter(datoteka, polja, extrasaction='ignore')
         pisalec.writeheader()
         for podatek in podatki:
@@ -117,14 +117,14 @@ def zapisi_csv(podatki, polja, ime_datoteke):
 ## download_all_time_lists(lists_directory)
    
 lists = read_lists(lists_directory)
-##
-##zapisi_json(lists, 'lists.json')
-##
-##polja = [
-##    'date', 'time', 'name', 'surname', 'id', 'rank', 'position',
-##    'DOB', 'venue', 'nationality',
-##]
-##
-##zapisi_csv(lists, polja, 'lists.csv')
+
+zapisi_json(lists, 'lists.json')
+
+polja = [
+    'date', 'time', 'name', 'surname', 'rank', 'position',
+    'DOB', 'venue', 'nationality',
+]
+
+zapisi_csv(lists, polja, 'lists.csv')
 
 
