@@ -62,6 +62,7 @@ def result_info(single_result):
 
 
 #prenese vse tablice od leta 2001 naprej
+#html file je v unicode zapisu, treba je prevest v utf8
 def download_all_time_lists (directory):
     os.makedirs(directory, exist_ok=True)
     for (year, page) in year_and_page : 
@@ -73,9 +74,10 @@ def download_all_time_lists (directory):
                 '{}?regionType=world&page={}&bestResultsOnly=true'
                 ).format(year, p)
                 session = requests.Session()
-                r = session.get(url, headers={'User-Agent': 'Mozilla/5.0'})
+                r = requests.get(url, headers={'User-Agent': 'Chrome/39.0.2171.95'})
                 print(r.status_code)
                 print(url)
+                print (r.encoding)
         
             except requests.exceptions.RequestException as e:
                 print(e)
@@ -114,14 +116,14 @@ def zapisi_csv(podatki, polja, ime_datoteke):
 
 #UKAZI
 
-## download_all_time_lists(lists_directory)
+#download_all_time_lists(lists_directory)
    
 lists = read_lists(lists_directory)
 
 zapisi_json(lists, 'lists.json')
 
 polja = [
-    'date', 'time', 'name', 'surname', 'rank', 'position',
+    'rank','date', 'time', 'name', 'position',
     'DOB', 'venue', 'nationality',
 ]
 
