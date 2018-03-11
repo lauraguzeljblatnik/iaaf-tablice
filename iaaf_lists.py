@@ -46,8 +46,9 @@ def result_info(single_result):
     match = re.search(re_result_info, single_result)
     if match:
         result = match.groupdict()
-        result['rank'] = int(result['rank'].strip()) if result['rank'].strip() != '' else None
-        result['time'] = str(result['time']).strip()
+        result['rank'] = (int(result['rank'].strip())
+                        if result['rank'].strip() != '' else None)
+        result['time'] = (str(result['time']).strip().replace('h', '0'))
         result['DOB'] = result['DOB'].strip()
         result['nationality'] = result['nationality'].strip()
         result['position'] = result['position'].strip()
@@ -62,7 +63,6 @@ def result_info(single_result):
 
 
 #prenese vse tablice od leta 2001 naprej
-#html file je v unicode zapisu, treba je prevest v utf8
 def download_all_time_lists (directory):
     os.makedirs(directory, exist_ok=True)
     for (year, page) in year_and_page : 
@@ -123,8 +123,8 @@ lists = read_lists(lists_directory)
 zapisi_json(lists, 'lists.json')
 
 polja = [
-    'rank','date', 'time', 'name', 'position',
-    'DOB', 'venue', 'nationality',
+    'rank', 'time', 'date', 'name', 'position',
+    'DOB', 'venue', 'nationality'
 ]
 
 zapisi_csv(lists, polja, 'lists.csv')
